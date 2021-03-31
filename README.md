@@ -1,6 +1,6 @@
 # Spatial_Audio_Communication
 
-Required downloads:
+Required downloads: 
 -IMU+GPS+STREAM android app
 -Max 8 
 -dearVR_MICRO 
