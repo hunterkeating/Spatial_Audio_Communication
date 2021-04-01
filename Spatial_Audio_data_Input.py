@@ -1,20 +1,15 @@
 import socket, traceback
 from math import sin, cos, sqrt, atan2, radians, pi, atan, degrees
 import OSC_server, map_function
-R=6373.0 # Radius of Earth in km
 
-#otherlati = '' # Setting base variables so function will continue to run until variables are no longer blank
-#thislati = ''
-#otherlong = ''
-#thislong = ''
 final_angle = None
 
 HOSTNAME = socket.gethostname()
 HOST = socket.gethostbyname(HOSTNAME)
-TARGET_PORT = 5555 #Port that you are sending data to
-TARGET_IP = "192.168.17.116" #IP of other computer
+TARGET_PORT = 5555 #Port that you are sending data to on other laptop/processor
+TARGET_IP = "192.168.16.174" #IP of other computer
 HOST_PORT1  = 5556 #Port receiving data from phone
-HOST_PORT2 = 5557 #Port receiving data from other processor
+HOST_PORT2 = 5557 #Port receiving data from other processor/laptop
 
 # For data from the phone
 sock1 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -34,7 +29,7 @@ while True:
     try:
         message, address = sock1.recvfrom(8192) 
         y = message.decode("utf-8") # Standard encoding for characters. y holds useful data
-        if ' 1, ' in y:
+        if ' 1, ' in y: # Parsing gps coordinate data from incoming packets from android
             keyword = ' 1, '
             before_keyword, keyword, after_keyword = y.partition(keyword)
             thislati = after_keyword[1:10]
@@ -44,8 +39,8 @@ while True:
             if after_keyword[12] == ' ':
                 thislong = after_keyword[13:22]
             
-            print('This latitude:', thislati)
-            print('This longitude:', thislong)
+            #print('This latitude:', thislati)
+            #print('This longitude:', thislong)
             
             
             #Send coordinates to other laptop
@@ -60,7 +55,7 @@ while True:
             received_coords, addr = sock2.recvfrom(4096)
             received_coords = received_coords.decode("utf-8")
             print("Received: %s" % received_coords)
-            
+            #Parsing gps coordinates being sent from other laptop
             if received_coords[0] == '-':
                 otherlati = received_coords[0:10]
             else:
@@ -72,10 +67,8 @@ while True:
             #print('Other latitude:', otherlati)
             #print('Other longitude:', otherlong)
 
-            #otherlati = '27.956279'
-            #otherlong = '-82.437388'
 
-            
+        # Parsing orientation being sent from phone
         if ' 81, ' in y:
             keyword = ' 81, '
             before_keyword, keyword, after_keyword = y.partition(keyword)
@@ -98,6 +91,7 @@ while True:
             otherlonr = radians(otherlon)
             dlat=otherlatr-thislatr # Difference in between the 2 nodes latitude
             dlon=otherlonr-thislonr # Difference in between the 2 nodes longitude
+
 
             # Determining which quadrant other lat long is with respect to this lat long
             if otherlatr==thislatr and otherlonr==thislonr:
@@ -128,9 +122,9 @@ while True:
             else:
                 final_angle = orientation - angle # Angle will be measured clockwise from direction of device 2
                 final_angle = 360 - final_angle # Angle will be measured clockwise from heading
-            angle_to_send = map_function.calc_angle(final_angle)
-            OSC_server.send_angle(angle_to_send)
-            print(final_angle)
+            angle_to_send = map_function.calc_angle(final_angle) # Calculates angle to send to plugin
+            OSC_server.send_angle(angle_to_send) # Sends angle locally to plugin
+            print(final_angle) 
         
     except (KeyboardInterrupt, SystemExit):
         raise
