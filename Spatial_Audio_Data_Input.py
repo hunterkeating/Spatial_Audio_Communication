@@ -7,7 +7,7 @@ final_angle = None
 HOSTNAME = socket.gethostname()
 HOST = socket.gethostbyname(HOSTNAME)
 TARGET_PORT = 5555 #Port that you are sending data to on other processor
-TARGET_IP = "192.168.16.177"
+TARGET_IP = "192.168.16.177" # IP address of other processor
 HOST_PORT1  = 5556 #Port receiving data from phone
 HOST_PORT2 = 5557 #Port receiving data from other processor
 
